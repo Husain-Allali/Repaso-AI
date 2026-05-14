@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestorTareas — Sistema DCA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --success: #22d3a5;
+    --warn: #f5a623;
+    --danger: #f25f5c;
+    --text: #e8eaf2;
+    --text2: #7a82a0;
+    --text3: #4a5270;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+ 
+  /* ===== NAV ===== */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+ 
+  .nav-logo {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    padding: 1.1rem 2rem 1.1rem 0;
+    margin-right: 1rem;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+ 
+  .nav-logo span { color: var(--text2); font-weight: 400; }
+ 
+  .nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+ 
+  .nav-tab {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text3);
+    padding: 0 1.2rem;
+    height: 56px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+ 
+  .nav-tab:hover { color: var(--text2); }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(79,142,247,0.04);
+  }
+ 
+  /* ===== SCREENS ===== */
+  .screen { display: none; padding: 2.5rem 2rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+ 
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+ 
+  /* ===== SHARED COMPONENTS ===== */
+  .screen-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+ 
+  .screen-title {
+    font-family: var(--font-head);
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+ 
+  .screen-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+ 
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-blue   { background: rgba(79,142,247,0.12); color: var(--accent);  border: 1px solid rgba(79,142,247,0.25); }
+  .badge-green  { background: rgba(34,211,165,0.12); color: var(--success); border: 1px solid rgba(34,211,165,0.25); }
+  .badge-orange { background: rgba(245,166,35,0.12); color: var(--warn);    border: 1px solid rgba(245,166,35,0.25); }
+  .badge-red    { background: rgba(242,95,92,0.12);  color: var(--danger);  border: 1px solid rgba(242,95,92,0.25); }
+  .badge-purple { background: rgba(124,92,252,0.12); color: var(--accent2); border: 1px solid rgba(124,92,252,0.25); }
+ 
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.65rem 1.4rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-primary  { background: var(--accent);  color: #fff; }
+  .btn-primary:hover  { background: #3a7af0; transform: translateY(-1px); }
+  .btn-ghost   { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover   { border-color: var(--text3); color: var(--text); }
+  .btn-danger  { background: rgba(242,95,92,0.15); color: var(--danger); border: 1px solid rgba(242,95,92,0.3); }
+  .btn-danger:hover  { background: rgba(242,95,92,0.25); }
+  .btn-success { background: rgba(34,211,165,0.15); color: var(--success); border: 1px solid rgba(34,211,165,0.3); }
+  .btn-success:hover { background: rgba(34,211,165,0.25); }
+ 
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+ 
+  .form-group {
+    margin-bottom: 1.4rem;
+  }
+ 
+  label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+  }
+ 
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+ 
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
+  }
+ 
+  textarea { resize: vertical; min-height: 90px; }
+ 
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+ 
+  /* ===== SCREEN 1: CREAR TAREA ===== */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .form-full { grid-column: 1 / -1; }
+ 
+  .validator-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-top: 1.5rem;
+  }
+ 
+  .validator-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 1rem;
+  }
+ 
+  .validator-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+ 
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+ 
+  .rule-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+ 
+  .rule-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+ 
+  .rule-icon { font-size: 0.8rem; }
+  .rule-item.ok   { color: var(--success); }
+  .rule-item.fail { color: var(--danger);  }
+ 
+  /* ===== SCREEN 2: VISUALIZAR ===== */
+  .task-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+ 
+  .task-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+ 
+  .task-table td {
+    padding: 0.9rem 1rem;
+    font-size: 0.87rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+ 
+  .task-table tr:last-child td { border-bottom: none; }
+ 
+  .task-table tr:hover td { background: rgba(255,255,255,0.02); }
+ 
+  .priority-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+ 
+  .p-alta   { background: var(--danger); }
+  .p-media  { background: var(--warn); }
+  .p-baja   { background: var(--success); }
+ 
+  .task-title-cell { font-weight: 500; }
+  .task-desc-cell  { color: var(--text2); font-size: 0.8rem; max-width: 220px; }
+ 
+  /* ===== SCREEN 3: EDITAR ===== */
+  .edit-top {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+ 
+  .historial-panel { }
+ 
+  .historial-title {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 1rem;
+  }
+ 
+  .historial-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+ 
+  .historial-item {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1.1rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border);
+    position: relative;
+  }
+ 
+  .historial-item::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 0;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--surface2);
+  }
+ 
+  .historial-item:last-child { border-left-color: transparent; }
+ 
+  .historial-time {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text3);
+    white-space: nowrap;
+    margin-top: 0.05rem;
+  }
+ 
+  .historial-text { font-size: 0.82rem; color: var(--text2); }
+  .historial-field { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; }
+ 
+  /* ===== SCREEN 4: ELIMINAR ===== */
+  .confirm-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+ 
+  .confirm-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(242,95,92,0.12);
+    border: 1px solid rgba(242,95,92,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+ 
+  .confirm-title {
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+ 
+  .confirm-desc {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+ 
+  .task-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+ 
+  .task-preview-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+ 
+  .task-preview-meta {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text3);
+    margin-top: 0.2rem;
+  }
+ 
+  .confirm-actions {
+    display: flex;
+    gap: 0.8rem;
+  }
+ 
+  .registro-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-top: 1.5rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+ 
+  .registro-title {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.8rem;
+  }
+ 
+  .registro-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .registro-item:last-child { border-bottom: none; }
+  .registro-key   { color: var(--text3); font-family: var(--font-mono); font-size: 0.72rem; }
+  .registro-value { color: var(--text2); }
+ 
+  /* ===== SCREEN 5: FILTRAR ===== */
+  .filter-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+  }
+ 
+  .filter-group { flex: 1; min-width: 140px; }
+ 
+  .filter-label {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+ 
+  .filter-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.85rem;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+ 
+  .result-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text3);
+    margin-bottom: 1rem;
+  }
+ 
+  .result-count span { color: var(--accent); font-weight: 500; }
+ 
+  /* ===== SCREEN 6: VALIDAR ===== */
+  .validation-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+ 
+  .error-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+ 
+  .error-item {
+    display: flex;
+    gap: 0.8rem;
+    background: rgba(242,95,92,0.06);
+    border: 1px solid rgba(242,95,92,0.2);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    font-size: 0.83rem;
+  }
+ 
+  .error-code {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--danger);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+  }
+ 
+  .error-msg  { color: var(--text2); line-height: 1.5; }
+ 
+  .regla-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+ 
+  .regla-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    font-size: 0.83rem;
+  }
+ 
+  .regla-id {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    color: var(--accent2);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+    background: rgba(124,92,252,0.1);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+ 
+  .regla-text { color: var(--text2); line-height: 1.5; }
+ 
+  /* stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+ 
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+  }
+ 
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+  }
+ 
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+ 
+  /* Responsive */
+  @media (max-width: 768px) {
+    .form-grid        { grid-template-columns: 1fr; }
+    .edit-top         { grid-template-columns: 1fr; }
+    .validation-flow  { grid-template-columns: 1fr; }
+    .stats-row        { grid-template-columns: 1fr 1fr; }
+    nav               { padding: 0 1rem; }
+    .screen           { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+ 
+<nav>
+  <div class="nav-logo">GestorTareas <span>/ DCA</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showScreen('crear')">① Crear</button>
+    <button class="nav-tab" onclick="showScreen('visualizar')">② Visualizar</button>
+    <button class="nav-tab" onclick="showScreen('editar')">③ Editar</button>
+    <button class="nav-tab" onclick="showScreen('eliminar')">④ Eliminar</button>
+    <button class="nav-tab" onclick="showScreen('filtrar')">⑤ Filtrar</button>
+  </div>
+</nav>
+ 
+<!-- ================================================================== -->
+<!-- PANTALLA 1: CREAR TAREA (FormularioTarea → GestorTareas → Tarea)   -->
+<!-- ================================================================== -->
+<div id="screen-crear" class="screen active">
+  <div class="screen-header">
+    <div>
+      <div class="screen-title">Crear Tarea</div>
+      <div class="screen-subtitle">FormularioTarea</div>
+    </div>
+    <span class="badge badge-blue">● GestorTareas activo</span>
+  </div>
+ 
+  <div class="card">
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Título de la tarea *</label>
+        <input type="text" id="crear-titulo" placeholder="Ej: Implementar módulo de autenticación" oninput="validarCampos()">
+      </div>
+ 
+      <div class="form-group form-full">
+        <label>Descripción</label>
+        <textarea id="crear-desc" placeholder="Describe los detalles de la tarea..." oninput="validarCampos()"></textarea>
+      </div>
+ 
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="crear-prioridad" onchange="validarCampos()">
+          <option value="">— Seleccionar —</option>
+          <option value="ALTA">🔴 ALTA</option>
+          <option value="MEDIA">🟡 MEDIA</option>
+          <option value="BAJA">🟢 BAJA</option>
+        </select>
+      </div>
+ 
+      <div class="form-group">
+        <label>Estado inicia</label>
+        <select id="crear-estado" onchange="validarCampos()">
+          <option value="">— Seleccionar —</option>
+          <option value="PENDIENTE">PENDIENTE</option>
+          <option value="EN_PROGRESO">EN PROGRESO</option>
+          <option value="COMPLETADA">COMPLETADA</option>
+        </select>
+      </div>
+ 
+      <div class="form-group">
+        <label>Fecha de inicio</label>
+        <input type="date" id="crear-inicio" oninput="validarCampos()">
+      </div>
+ 
+      <div class="form-group">
+        <label>Fecha límite</label>
+        <input type="date" id="crear-limite" oninput="validarCampos()">
+      </div>
+    </div>
+ 
+    <!-- ValidadorTareas panel -->
+    <div class="validator-panel">
+      <div class="validator-header">
+        <div class="validator-dot"></div>
+        ValidadorTareas
+      </div>
+      <ul class="rule-list" id="crear-rules">
+        <li class="rule-item" id="rule-titulo">
+          <span class="rule-icon">○</span> El título no puede estar vacío
+        </li>
+        <li class="rule-item" id="rule-prioridad">
+          <span class="rule-icon">○</span> Debe seleccionarse una prioridad
+        </li>
+        <li class="rule-item" id="rule-estado">
+          <span class="rule-icon">○</span> Debe seleccionarse un estado inicial
+        </li>
+        <li class="rule-item" id="rule-fechas">
+          <span class="rule-icon">○</span> La fecha límite debe ser posterior a la de inicio
+        </li>
+      </ul>
+    </div>
+ 
+    <hr class="divider">
+ 
+    <div style="display:flex; gap:0.8rem; justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="limpiarCrear()">Limpiar</button>
+      <button class="btn btn-primary" id="btn-crear" onclick="crearTarea()" disabled>Crear tarea</button>
+    </div>
+ 
+    <div id="crear-feedback" style="margin-top:1rem;display:none;">
+      <span class="badge badge-green">✓ Tarea creada correctamente</span>
+    </div>
+  </div>
+</div>
+ 
+<!-- ================================================================== -->
+<!-- PANTALLA 2: VISUALIZAR (PantallaListaTareas → GestorVisualizacion → RepositorioTareas → Tarea) -->
+<!-- ================================================================== -->
+<div id="screen-visualizar" class="screen">
+  <div class="screen-header">
+    <div>
+      <div class="screen-title">Visualizar Tareas</div>
+      <div class="screen-subtitle">PantallaListaTareas</div>
+    </div>
+    <span class="badge badge-green">RepositorioTareas consultado</span>
+  </div>
+ 
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total tareas</div>
+      <div class="stat-value" style="color:var(--accent)">6</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completadas</div>
+      <div class="stat-value" style="color:var(--success)">2</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">En progreso</div>
+      <div class="stat-value" style="color:var(--warn)">3</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pendientes</div>
+      <div class="stat-value" style="color:var(--danger)">1</div>
+    </div>
+  </div>
+ 
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tarea</th>
+          <th>Descripción</th>
+          <th>Prioridad</th>
+          <th>Estado</th>
+          <th>Fecha límite</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#001</td>
+          <td class="task-title-cell">Implementar auth JWT</td>
+          <td class="task-desc-cell">Módulo de autenticación con tokens</td>
+          <td><span class="priority-dot p-alta"></span><span class="badge badge-red" style="font-size:0.6rem">ALTA</span></td>
+          <td><span class="badge badge-orange">EN PROGRESO</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">15/06/2025</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#002</td>
+          <td class="task-title-cell">Diseño de base de datos</td>
+          <td class="task-desc-cell">Modelo entidad-relación del sistema</td>
+          <td><span class="priority-dot p-alta"></span><span class="badge badge-red" style="font-size:0.6rem">ALTA</span></td>
+          <td><span class="badge badge-green">COMPLETADA</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">01/06/2025</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#003</td>
+          <td class="task-title-cell">Tests unitarios módulo tareas</td>
+          <td class="task-desc-cell">Cobertura mínima del 80%</td>
+          <td><span class="priority-dot p-media"></span><span class="badge badge-orange" style="font-size:0.6rem">MEDIA</span></td>
+          <td><span class="badge badge-orange">EN PROGRESO</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">20/06/2025</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#004</td>
+          <td class="task-title-cell">Documentación API REST</td>
+          <td class="task-desc-cell">Swagger/OpenAPI 3.0</td>
+          <td><span class="priority-dot p-baja"></span><span class="badge badge-green" style="font-size:0.6rem">BAJA</span></td>
+          <td><span class="badge badge-blue">PENDIENTE</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">30/06/2025</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#005</td>
+          <td class="task-title-cell">Refactor capa de servicios</td>
+          <td class="task-desc-cell">Separación de responsabilidades</td>
+          <td><span class="priority-dot p-media"></span><span class="badge badge-orange" style="font-size:0.6rem">MEDIA</span></td>
+          <td><span class="badge badge-orange">EN PROGRESO</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">18/06/2025</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#006</td>
+          <td class="task-title-cell">Deploy en producción</td>
+          <td class="task-desc-cell">CI/CD pipeline con Docker</td>
+          <td><span class="priority-dot p-alta"></span><span class="badge badge-red" style="font-size:0.6rem">ALTA</span></td>
+          <td><span class="badge badge-green">COMPLETADA</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">10/06/2025</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:0.8rem;">
+    <span class="badge badge-purple">Prioridad «enumeration»: ALTA · MEDIA · BAJA</span>
+  </div>
+</div>
+ 
+<!-- ================================================================== -->
+<!-- PANTALLA 3: EDITAR (ListaTareas → FormularioEdicion → GestorEdicion → Tarea → HistorialCambios) -->
+<!-- ================================================================== -->
+<div id="screen-editar" class="screen">
+  <div class="screen-header">
+    <div>
+      <div class="screen-title">Editar Tarea</div>
+      <div class="screen-subtitle">FormularioEdicion</div>
+    </div>
+    <span class="badge badge-orange">GestorEdicion + ValidadorTareas activos</span>
+  </div>
+ 
+  <!-- ListaTareas boundary: selector -->
+  <div class="card" style="margin-bottom:1.2rem;">
+    <label>ListaTarea — Seleccionar tarea a editar</label>
+    <select onchange="seleccionarTareaEditar(this.value)">
+      <option value="">— Elige una tarea —</option>
+      <option value="001">#001 · Implementar auth JWT</option>
+      <option value="003">#003 · Tests unitarios módulo tareas</option>
+      <option value="005">#005 · Refactor capa de servicios</option>
+    </select>
+  </div>
+ 
+  <div class="edit-top" id="edit-form-area" style="display:none;">
+    <!-- FormularioEdicion -->
+    <div class="card">
+      <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1.2rem;">FormularioEdicion «boundary»</div>
+ 
+      <div class="form-group">
+        <label>Título</label>
+        <input type="text" id="edit-titulo" value="Implementar auth JWT">
+      </div>
+ 
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="edit-desc">Módulo de autenticación con tokens JWT y refresh tokens</textarea>
+      </div>
+ 
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="edit-prioridad">
+          <option value="ALTA" selected>🔴 ALTA</option>
+          <option value="MEDIA">🟡 MEDIA</option>
+          <option value="BAJA">🟢 BAJA</option>
+        </select>
+      </div>
+ 
+      <div class="form-group">
+        <label>Estado (EstadoTarea)</label>
+        <select id="edit-estado">
+          <option value="PENDIENTE">PENDIENTE</option>
+          <option value="EN_PROGRESO" selected>EN PROGRESO</option>
+          <option value="COMPLETADA">COMPLETADA</option>
+        </select>
+      </div>
+ 
+      <!-- ValidadorTareas usa -->
+      <div class="validator-panel" style="margin-top:0.5rem;">
+        <div class="validator-header">
+          <div class="validator-dot"></div>
+          ValidadorTareas «control» — «uses»
+        </div>
+        <ul class="rule-list">
+          <li class="rule-item ok"><span class="rule-icon">✓</span> Título válido</li>
+          <li class="rule-item ok"><span class="rule-icon">✓</span> Prioridad seleccionada</li>
+          <li class="rule-item ok"><span class="rule-icon">✓</span> Estado coherente con el flujo</li>
+        </ul>
+      </div>
+ 
+      <hr class="divider">
+      <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+        <button class="btn btn-ghost">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEdicion()">Guardar cambios</button>
+      </div>
+      <div id="edit-feedback" style="margin-top:1rem;display:none;">
+        <span class="badge badge-green">✓ GestorEdicion guardó los cambios — HistorialCambios actualizado</span>
+      </div>
+    </div>
+ 
+    <!-- HistorialCambios entity -->
+    <div class="card historial-panel">
+      <div class="historial-title">HistorialCambios «entity» — registra</div>
+      <ul class="historial-list">
+        <li class="historial-item">
+          <div>
+            <div class="historial-time">Hoy 14:32</div>
+            <div class="historial-text">Campo <span class="historial-field">estado</span> cambiado de <em>PENDIENTE</em> a <em>EN_PROGRESO</em></div>
+          </div>
+        </li>
+        <li class="historial-item">
+          <div>
+            <div class="historial-time">Ayer 09:15</div>
+            <div class="historial-text">Campo <span class="historial-field">descripción</span> actualizado</div>
+          </div>
+        </li>
+        <li class="historial-item">
+          <div>
+            <div class="historial-time">03/06 11:00</div>
+            <div class="historial-text">Campo <span class="historial-field">prioridad</span> cambiado de <em>MEDIA</em> a <em>ALTA</em></div>
+          </div>
+        </li>
+        <li class="historial-item">
+          <div>
+            <div class="historial-time">01/06 08:00</div>
+            <div class="historial-text">Tarea creada — estado inicial <em>PENDIENTE</em></div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+ 
+<!-- ================================================================== -->
+<!-- PANTALLA 4: ELIMINAR (ListaTareas → DialogoConfirmacion → GestorEliminacion → Tarea → RegistroEliminacion) -->
+<!-- ================================================================== -->
+<div id="screen-eliminar" class="screen">
+  <div class="screen-header">
+    <div>
+      <div class="screen-title">Eliminar Tarea</div>
+      <div class="screen-subtitle">DialogoConfirmacion</div>
+    </div>
+    <span class="badge badge-red">Acción irreversible</span>
+  </div>
+ 
+  <!-- ListaTareas boundary -->
+  <div class="card" style="margin-bottom:1.5rem; max-width:520px; margin-left:auto; margin-right:auto;">
+    <label>ListaTareas — Seleccionar tarea a eliminar</label>
+    <select onchange="seleccionarEliminar(this.value)">
+      <option value="">— Elige una tarea —</option>
+      <option value="004">#004 · Documentación API REST</option>
+      <option value="005">#005 · Refactor capa de servicios</option>
+    </select>
+  </div>
+ 
+  <!-- DialogoConfirmacion boundary -->
+  <div class="confirm-modal" id="elim-modal" style="display:none;">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">¿Confirmar eliminación?</div>
+    <div class="confirm-desc">
+      Esta acción no puede deshacerse. <strong>GestorEliminacion</strong> eliminará la tarea del sistema y generará un <strong>RegistroEliminacion</strong> para auditoría.
+    </div>
+ 
+    <div class="task-preview">
+      <div>
+        <div class="task-preview-name" id="elim-nombre">— </div>
+        <div class="task-preview-meta" id="elim-meta">—</div>
+      </div>
+    </div>
+ 
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="cancelarEliminar()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarEliminar()">Sí, eliminar tarea</button>
+    </div>
+ 
+    <div id="elim-feedback" style="margin-top:1rem;display:none;">
+      <span class="badge badge-green">✓ GestorEliminacion procesó la eliminación</span>
+    </div>
+  </div>
+ 
+  <!-- RegistroEliminacion entity -->
+  <div class="registro-panel" id="registro-panel" style="display:none;">
+    <div class="registro-title">RegistroEliminacion — genera</div>
+    <div class="registro-item">
+      <div class="registro-key">ID Registro</div>
+      <div class="registro-value" id="reg-id">REG-20250606-001</div>
+    </div>
+    <div class="registro-item">
+      <div class="registro-key">Tarea ID</div>
+      <div class="registro-value" id="reg-tarea">#004</div>
+    </div>
+    <div class="registro-item">
+      <div class="registro-key">Motivo</div>
+      <div class="registro-value">Eliminación manual por usuario</div>
+    </div>
+    <div class="registro-item">
+      <div class="registro-key">Timestamp</div>
+      <div class="registro-value" id="reg-ts">—</div>
+    </div>
+    <div class="registro-item">
+      <div class="registro-key">Estado</div>
+      <div class="registro-value"><span class="badge badge-green" style="font-size:0.62rem">REGISTRADO</span></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ================================================================== -->
+<!-- PANTALLA 5: FILTRAR (PanelFiltros → CriterioFiltro → GestorFiltrado → RepositorioTareas → Tarea) -->
+<!-- ================================================================== -->
+<div id="screen-filtrar" class="screen">
+  <div class="screen-header">
+    <div>
+      <div class="screen-title">Filtrar Tareas</div>
+      <div class="screen-subtitle">PanelFiltro</div>
+    </div>
+    <span class="badge badge-purple">EstadoTarea </span>
+  </div>
+ 
+  <!-- PanelFiltros boundary + CriterioFiltro entity -->
+  <div class="filter-bar"> 
+    <div class="filter-group">
+      <span class="filter-label">Estado (EstadoTarea)</span>
+      <select class="filter-select" id="f-estado" onchange="aplicarFiltros()">
+        <option value="">Todos</option>
+        <option value="PENDIENTE">PENDIENTE</option>
+        <option value="EN_PROGRESO">EN PROGRESO</option>
+        <option value="COMPLETADA">COMPLETADA</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Prioridad</span>
+      <select class="filter-select" id="f-prioridad" onchange="aplicarFiltros()">
+        <option value="">Todas</option>
+        <option value="ALTA">ALTA</option>
+        <option value="MEDIA">MEDIA</option>
+        <option value="BAJA">BAJA</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Ordenar por</span>
+      <select class="filter-select" id="f-orden" onchange="aplicarFiltros()">
+        <option value="fecha">Fecha límite</option>
+        <option value="prioridad">Prioridad</option>
+        <option value="estado">Estado</option>
+      </select>
+    </div>
+    <div>
+      <button class="btn btn-ghost" onclick="limpiarFiltros()">✕ Limpiar</button>
+    </div>
+  </div>
+ 
+  <!-- CriterioFiltro usa EstadoTarea -->
+  <div style="margin-bottom:1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+    <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">CriterioFiltro activo:</span>
+    <span class="badge badge-purple" id="criterio-badge">Sin filtros — retorna 0..* Tareas</span>
+  </div>
+ 
+  <div class="result-count" id="result-count">RepositorioTareas retorna <span id="result-num">6</span> tarea(s)</div>
+ 
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="task-table" id="filtro-tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tarea «entity»</th>
+          <th>Prioridad</th>
+          <th>Estado</th>
+          <th>Fecha límite</th>
+        </tr>
+      </thead>
+      <tbody id="filtro-body">
+        <!-- generado por JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+<!-- ================================================================ -->
+<script>
+  // ── Navigation ──────────────────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (id === 'filtrar') iniciarFiltros();
+  }
+ 
+  // ── Screen 1: Crear ─────────────────────────────────────────────
+  function validarCampos() {
+    const t = document.getElementById('crear-titulo').value.trim();
+    const p = document.getElementById('crear-prioridad').value;
+    const e = document.getElementById('crear-estado').value;
+    const i = document.getElementById('crear-inicio').value;
+    const l = document.getElementById('crear-limite').value;
+ 
+    setRule('rule-titulo',    t.length >= 3);
+    setRule('rule-prioridad', p !== '');
+    setRule('rule-estado',    e !== '');
+    const fechasOk = !i || !l || new Date(l) >= new Date(i);
+    setRule('rule-fechas', fechasOk);
+ 
+    const ok = t.length >= 3 && p && e && fechasOk;
+    document.getElementById('btn-crear').disabled = !ok;
+  }
+ 
+  function setRule(id, ok) {
+    const el = document.getElementById(id);
+    el.className = 'rule-item ' + (ok ? 'ok' : 'fail');
+    el.querySelector('.rule-icon').textContent = ok ? '✓' : '✗';
+  }
+ 
+  function limpiarCrear() {
+    ['crear-titulo','crear-desc','crear-prioridad','crear-estado','crear-inicio','crear-limite']
+      .forEach(id => document.getElementById(id).value = '');
+    document.querySelectorAll('.rule-item').forEach(el => {
+      el.className = 'rule-item';
+      el.querySelector('.rule-icon').textContent = '○';
+    });
+    document.getElementById('btn-crear').disabled = true;
+    document.getElementById('crear-feedback').style.display = 'none';
+  }
+ 
+  function crearTarea() {
+    document.getElementById('crear-feedback').style.display = 'block';
+    setTimeout(limpiarCrear, 3000);
+  }
+ 
+  // ── Screen 3: Editar ─────────────────────────────────────────────
+  function seleccionarTareaEditar(v) {
+    const area = document.getElementById('edit-form-area');
+    area.style.display = v ? 'grid' : 'none';
+  }
+ 
+  function guardarEdicion() {
+    const fb = document.getElementById('edit-feedback');
+    fb.style.display = 'block';
+    setTimeout(() => fb.style.display = 'none', 3000);
+  }
+ 
+  // ── Screen 4: Eliminar ───────────────────────────────────────────
+  const tareas = {
+    '004': { nombre: 'Documentación API REST', meta: '#004 · Prioridad BAJA · PENDIENTE' },
+    '005': { nombre: 'Refactor capa de servicios', meta: '#005 · Prioridad MEDIA · EN PROGRESO' }
+  };
+ 
+  let tareaSeleccionada = null;
+ 
+  function seleccionarEliminar(v) {
+    tareaSeleccionada = v;
+    const modal = document.getElementById('elim-modal');
+    if (!v) { modal.style.display = 'none'; return; }
+    modal.style.display = 'block';
+    document.getElementById('elim-nombre').textContent = tareas[v].nombre;
+    document.getElementById('elim-meta').textContent   = tareas[v].meta;
+    document.getElementById('elim-feedback').style.display = 'none';
+    document.getElementById('registro-panel').style.display = 'none';
+  }
+ 
+  function cancelarEliminar() {
+    document.getElementById('elim-modal').style.display = 'none';
+    document.querySelector('#screen-eliminar select').value = '';
+    tareaSeleccionada = null;
+  }
+ 
+  function confirmarEliminar() {
+    document.getElementById('elim-feedback').style.display = 'block';
+    const now = new Date();
+    document.getElementById('reg-id').textContent   = 'REG-' + now.toISOString().slice(0,10).replace(/-/g,'') + '-00' + tareaSeleccionada;
+    document.getElementById('reg-tarea').textContent = '#' + tareaSeleccionada;
+    document.getElementById('reg-ts').textContent   = now.toLocaleString('es-ES');
+    document.getElementById('registro-panel').style.display = 'block';
+  }
+ 
+  // ── Screen 5: Filtrar ────────────────────────────────────────────
+  const allTareas = [
+    { id:'001', titulo:'Implementar auth JWT',         prioridad:'ALTA',  estado:'EN_PROGRESO', fecha:'15/06/2025' },
+    { id:'002', titulo:'Diseño de base de datos',      prioridad:'ALTA',  estado:'COMPLETADA',  fecha:'01/06/2025' },
+    { id:'003', titulo:'Tests unitarios módulo tareas',prioridad:'MEDIA', estado:'EN_PROGRESO', fecha:'20/06/2025' },
+    { id:'004', titulo:'Documentación API REST',       prioridad:'BAJA',  estado:'PENDIENTE',   fecha:'30/06/2025' },
+    { id:'005', titulo:'Refactor capa de servicios',   prioridad:'MEDIA', estado:'EN_PROGRESO', fecha:'18/06/2025' },
+    { id:'006', titulo:'Deploy en producción',         prioridad:'ALTA',  estado:'COMPLETADA',  fecha:'10/06/2025' },
+  ];
+ 
+  const estadoBadge = {
+    'PENDIENTE':'badge-blue','EN_PROGRESO':'badge-orange','COMPLETADA':'badge-green'
+  };
+  const prioBadge = { 'ALTA':'badge-red','MEDIA':'badge-orange','BAJA':'badge-green' };
+ 
+  function iniciarFiltros() { renderFiltro(allTareas); }
+ 
+  function aplicarFiltros() {
+    const fe = document.getElementById('f-estado').value;
+    const fp = document.getElementById('f-prioridad').value;
+    let result = allTareas.filter(t =>
+      (!fe || t.estado === fe) &&
+      (!fp || t.prioridad === fp)
+    );
+ 
+    const criterios = [];
+    if (fe) criterios.push('Estado=' + fe);
+    if (fp) criterios.push('Prioridad=' + fp);
+    const badge = document.getElementById('criterio-badge');
+    badge.textContent = criterios.length ? criterios.join(' · ') + ' — retorna 0..* Tareas' : 'Sin filtros — retorna 0..* Tareas';
+ 
+    renderFiltro(result);
+  }
+ 
+  function renderFiltro(data) {
+    document.getElementById('result-num').textContent = data.length;
+    const tbody = document.getElementById('filtro-body');
+    tbody.innerHTML = data.map(t => `
+      <tr>
+        <td style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3)">#${t.id}</td>
+        <td style="font-weight:500">${t.titulo}</td>
+        <td><span class="badge ${prioBadge[t.prioridad]}" style="font-size:0.6rem">${t.prioridad}</span></td>
+        <td><span class="badge ${estadoBadge[t.estado]}" style="font-size:0.6rem">${t.estado.replace('_',' ')}</span></td>
+        <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">${t.fecha}</td>
+      </tr>`).join('');
+  }
+ 
+  function limpiarFiltros() {
+    document.getElementById('f-estado').value = '';
+    document.getElementById('f-prioridad').value = '';
+    document.getElementById('f-orden').value = 'fecha';
+    aplicarFiltros();
+  }
+ 
+  // Inicializar tabla de filtros al cargar
+  window.addEventListener('load', () => renderFiltro(allTareas));
+</script>
+</body>
+</html>

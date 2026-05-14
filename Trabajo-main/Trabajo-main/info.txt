@@ -1,0 +1,3 @@
+Este proyecto consiste en el desarrollo de una aplicación de gestión de tareas para mejorar la organización y productividad de los usuarios. 
+La app permitirá crear, editar, eliminar y clasificar tareas según su estado, prioridad y fecha límite. Su objetivo es ofrecer una herramienta sencilla y funcional para organizar actividades diarias de forma eficiente.
+Vamos a aplicar conceptos de análisis, diseño de software y pruebas, incluyendo diagramas UML, definición de requisitos y la realización de tests para validar el correcto funcionamiento del sistema.

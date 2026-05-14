@@ -1,0 +1,85 @@
+4.1 Requisitos funcionales ------->
+
+•	El sistema permitirá crear nuevas tareas:
+
+El usuario introduce datos como:
+título
+descripción
+fecha límite
+prioridad (si existe)
+El sistema valida que los datos sean correctos (por ejemplo, que el título no esté vacío).
+Si todo es correcto, la tarea se guarda en la base de datos.
+
+•	El sistema permitirá editar tareas existentes:
+
+El usuario selecciona una tarea existente.
+Puede cambiar:
+título
+descripción
+fecha
+estado o prioridad
+El sistema guarda los cambios y actualiza la tarea.
+
+•	El sistema permitirá eliminar tareas:
+
+El usuario selecciona una tarea.
+Confirma la eliminación (normalmente con un mensaje de seguridad).
+La tarea se elimina de la base de datos.
+
+•	El sistema permitirá marcar tareas como completadas:
+
+Cada tarea tiene un estado:
+pendiente
+completada
+El usuario marca una tarea como finalizada.
+El sistema actualiza su estado.
+
+•	El sistema permitirá visualizar todas las tareas:
+
+Se listan todas las tareas almacenadas.
+Pueden mostrarse con:
+título
+estado
+fecha
+Puede haber orden (por fecha o prioridad).
+
+
+•	El sistema filtrar todas las tareas:
+
+El usuario puede filtrar:
+solo pendientes
+solo completadas
+El sistema oculta las demás temporalmente.
+
+4.2 Requisitos no funcionales -------->
+
+•	El sistema debe tener un tiempo de respuesta rápido:
+
+Cuando el usuario:
+crea una tarea
+la elimina
+la edita
+La respuesta del sistema debe ser casi inmediata (milisegundos o pocos segundos).
+Esto implica:
+buena optimización del código
+consultas eficientes a la base de datos
+evitar procesos innecesarios
+
+•	La interfaz debe ser clara e intuitiva:
+
+Los botones deben ser visibles y fáciles de identificar.
+La información debe estar organizada de forma lógica.
+Se deben usar:
+iconos claros
+colores coherentes
+distribución simple (UI limpia)
+El usuario no debe confundirse al usar la aplicación.
+
+•	El sistema debe ser accesible desde un navegador web:
+
+Debe funcionar en navegadores como:
+Chrome
+Firefox
+Edge
+Debe ser una aplicación web (HTML, CSS, JavaScript o framework web).
+Puede ser responsive (adaptarse a móvil y PC).

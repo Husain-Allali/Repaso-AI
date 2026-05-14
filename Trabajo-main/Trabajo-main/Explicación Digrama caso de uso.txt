@@ -1,0 +1,6 @@
+En este diagrama se observa como el usuario puede realizar varias cosas.
+Puede CrearTarea la cual lleva un <<include>> que obliga que se validen los datos (que compruebe que esten rellenados los campos necesarios). 
+EditarTarea también lleva el mismo <<include>> por lo cual se comporta de la misma manera.
+Con EliminarTarea podremos eliminar las tareas que ya no nos sean necesarias y con el <<include>> debemos confirmar la eliminación de la tarea como se ve en el diagrama.
+MarcarComoCompletado es sencillo y no tiene complejidad y por último VisualizarTarea trae 
+un extend por lo cual no es algo que se debe realizar de manera obligatoria, solo si el usuario la necesita.
